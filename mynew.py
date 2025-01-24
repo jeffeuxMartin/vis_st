@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 # 解析 Query String 獲取資料
-query_params = st.experimental_get_query_params()
+query_params = st.query_params
 raw_data = query_params.get("data", [None])[0]
 
 if not raw_data:
