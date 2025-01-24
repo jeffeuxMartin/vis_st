@@ -41,7 +41,7 @@ color_map = {
 }
 
 # Assign dummy results for demo purposes (replace with actual logic)
-df["result"] = ["tournament" if rank <= 4 else "keep" if rank <= 8 else "demotion" for rank in df["rank"]]
+df["result"] = ["tournament" if rank <= 4+4 else "keep" if rank <= 8+8 else "demotion" for rank in df["rank"]]
 
 # Create the figure
 fig = go.Figure()
