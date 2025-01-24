@@ -11,6 +11,7 @@ if not raw_data:
     st.stop()
 
 # 將資料轉換為 DataFrame
+print(raw_data)
 data = []
 for item in raw_data.split(';'):
     rank, name, score = item.split(',')
