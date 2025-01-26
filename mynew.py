@@ -4,6 +4,11 @@ import plotly.graph_objects as go
 
 # 解析 Query String 獲取資料
 query_params = st.query_params
+raw_data2 = query_params.get("split1", "8")
+raw_data3 = query_params.get("split2", "16")
+raw_data2=eval(raw_data2)
+raw_data3=eval(raw_data3)
+
 raw_data = query_params.get("data", [None])
 
 if not raw_data:
@@ -42,7 +47,7 @@ color_map = {
 }
 
 # Assign dummy results for demo purposes (replace with actual logic)
-df["result"] = ["tournament" if rank <= 4+4 else "keep" if rank <= 8+8 else "demotion" for rank in df["rank"]]
+df["result"] = ["tournament" if rank <= raw_data2 else "keep" if rank <= raw_data3 else "demotion" for rank in df["rank"]]
 
 # Create the figure
 fig = go.Figure()
