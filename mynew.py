@@ -6,8 +6,8 @@ import plotly.graph_objects as go
 query_params = st.query_params
 raw_data2 = query_params.get("split1", "8")
 raw_data3 = query_params.get("split2", "16")
-raw_data2=eval(raw_data2)
-raw_data3=eval(raw_data3)
+raw_data2 = eval(raw_data2)
+raw_data3 = eval(raw_data3)
 
 raw_data = query_params.get("data", [None])
 
@@ -35,7 +35,7 @@ df["x_position"] = max(df["rank"]) - df["rank"]
 # Calculate differences between scores and their midpoints
 df["score_diff"] = df["score"].diff(periods=-1).fillna(0).astype(int)  # Difference between consecutive scores
 df["mid_x"] = (df["x_position"] + df["x_position"].shift(-1)) / 2  # Midpoint of x_position
-df["mid_y"] = (df["score"] + df["score"].shift(-1)) / 2 +1000 # Midpoint of scores
+df["mid_y"] = ((df["score"] + df["score"].shift(-1)) / 2) * 1.05 # Midpoint of scores
 df["score_diff_text"] = df["score_diff"].apply(lambda x: f"{abs(x)}" if x != 0 else "")
 df["text_annotation"] = df["name"] + "<br />" + df["score"].astype(str)
 
@@ -86,7 +86,7 @@ for i, row in df.iterrows():
         text=row["text_annotation"],
         # textposition="outside",
         # hoverinfo="text"
-        hovertemplate=row["text_annotation"],
+        # hovertemplate=row["text_annotation"],
         textfont=dict(
             size=14, 
             # color="black",
@@ -106,6 +106,14 @@ for i, row in df.iterrows():
         # hovertemplate="<b>%{text}</b><extra></extra>",
         # texttemplate="%{text}",
         # rotation=0,  # Rotate text to horizontal
+        # turn_off_hover=True,
+        # hovertemplate=(
+            # "<b>%{text}</b><br>" +
+            # "Rank: %{x}<br>" +
+            # "Score: %{y}<extra></extra>"
+        # ),
+        hovertemplate=None,
+        # texttemplate="%{text}",
 
     ))
 
@@ -155,6 +163,13 @@ fig.update_layout(
         pad=0,
         )
        
+)
+
+# 居然要這樣才能讓 hovertemplate 不顯示！
+fig.update_traces(
+    hoverinfo="none",
+    # hovertemplate="%{text}",
+    # texttemplate="%{text}",
 )
 
 # Display the plot
