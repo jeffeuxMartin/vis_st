@@ -54,7 +54,7 @@ def color_my_ify(color, is_me):
     elif color == "blue":
         return "rgba(100, 100, 255, 0.5)"
     elif color == "red":
-        return "rgba(255, 0, 0, 0.5)"
+        return "rgba(255, 100, 0, 0.5)"
     else:
         return "rgba(128, 128, 128, 0.5)"
 
@@ -71,19 +71,64 @@ fig = go.Figure()
 
 MY_NAME = "Kaede かえで كايدي"
 
+def color_determiner(
+        row,
+):
+    result = color_my_ify(
+                color_map[row["result"]],
+                is_me=(row["name"] == MY_NAME)  # Replace with actual logic to check if it's the user's name
+            )
+    print(result)
+    return result
+
+def color_determiner2(
+        row,
+):
+    if color_determiner(row) == "rgba(0, 255, 0, 0.5)":
+        return "green"
+    elif color_determiner(row) == "rgba(100, 100, 255, 0.5)":
+        return "blue"
+    elif color_determiner(row) == "rgba(255, 100, 0, 0.5)":
+        return "white"
+    elif color_determiner(row) == "rgba(128, 128, 128, 0.5)":
+        return "gray"
+    elif color_determiner(row) == "cyan":
+        return "magenta"
+    elif color_determiner(row) == "blue":
+        return "yellow"
+    elif color_determiner(row) == "red":
+        return "black"
+    else:
+        return "yellow"
+
+
 # Add bars for each rank
 for i, row in df.iterrows():
     fig.add_trace(go.Bar(
         x=[row["x_position"]],
         y=[row["score"]],
         marker_color=(
-            color_my_ify(
-                color_map[row["result"]],
-                is_me=(row["name"] == MY_NAME)  # Replace with actual logic to check if it's the user's name
-            )
+            color_determiner(row)
         ),
         # name=row["result"] if i == 0 else None,  # Show legend only once
-        text=row["text_annotation"],
+        
+        # text=row["text_annotation"],
+        # === add url
+        text=(
+            f'<a href='
+            # f'{
+                # df["url"][i]
+                "https://www.example.com/"
+            # }
+            f' target="_blank">'
+            f'<span style="color: {color_determiner2(row)};">'
+            f'{row["text_annotation"]}'
+            '</span>'
+            '</a>',
+        ),
+
+
+
         # textposition="outside",
         # hoverinfo="text"
         # hovertemplate=row["text_annotation"],
