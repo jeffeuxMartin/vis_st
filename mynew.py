@@ -221,11 +221,19 @@ fig.update_traces(
 # st.title("Duolingo League Visualization")
 # st.title("排名")
 import datetime,pytz
-st.write("### {}".format(datetime.datetime.now(
+if 0: st.write("### {}".format(datetime.datetime.now(
 
 
     pytz.timezone('Asia/Taipei')
 )))
+
+
+import datetime
+import pytz
+
+st.write("### {}".format(datetime.datetime.now(pytz.timezone('Asia/Taipei')).strftime('%Y/%m/%d %H:%M:%S')))
+
+
 
 
 st.plotly_chart(fig)
