@@ -4,8 +4,8 @@ import plotly.graph_objects as go
 
 # 解析 Query String 獲取資料
 query_params = st.query_params
-raw_data2 = query_params.get("split1", "8")
-raw_data3 = query_params.get("split2", "16")
+raw_data2 = query_params.get("split1", "3")
+raw_data3 = query_params.get("split2", "10")
 raw_data2 = eval(raw_data2)
 raw_data3 = eval(raw_data3)
 
@@ -218,7 +218,12 @@ fig.update_traces(
 )
 
 # Display the plot
-st.title("Duolingo League Visualization")
+# st.title("Duolingo League Visualization")
+st.title("排名")
+import datetime
+st.write(datetime.datetime.now())
+
+
 st.plotly_chart(fig)
 
 ### # Show raw data as a table
