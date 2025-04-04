@@ -203,8 +203,8 @@ fig.update_layout(
     margin=dict(
         # l=40,
         r=40,
-        t=20,
-        b=0,
+        t=10,
+        b=10,
         pad=0,
         )
        
@@ -222,7 +222,7 @@ formatted_time = datetime.datetime.now(pytz.timezone('Asia/Taipei')).strftime('%
 
 # 創建 Plotly 
 fig.update_layout(
-    title="Current Time: {}".format(formatted_time)
+    title="{}".format(formatted_time)
 )
 
 
