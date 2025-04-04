@@ -216,6 +216,15 @@ fig.update_traces(
     # hovertemplate="%{text}",
     # texttemplate="%{text}",
 )
+import datetime,pytz
+
+formatted_time = datetime.datetime.now(pytz.timezone('Asia/Taipei')).strftime('%Y/%m/%d %H:%M:%S')
+
+# 創建 Plotly 
+fig.update_layout(
+    title="Current Time: {}".format(formatted_time)
+)
+
 
 # Display the plot
 # st.title("Duolingo League Visualization")
@@ -231,7 +240,7 @@ if 0: st.write("### {}".format(datetime.datetime.now(
 import datetime
 import pytz
 
-st.write("### {}".format(datetime.datetime.now(pytz.timezone('Asia/Taipei')).strftime('%Y/%m/%d %H:%M:%S')))
+if 0: st.write("### {}".format(datetime.datetime.now(pytz.timezone('Asia/Taipei')).strftime('%Y/%m/%d %H:%M:%S')))
 
 
 
