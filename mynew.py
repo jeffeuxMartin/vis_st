@@ -198,7 +198,7 @@ fig.update_layout(
     ),
     yaxis=dict(title="Score"),
     barmode="group",
-    height=600,
+    height=400,
     # width=1000,
     margin=dict(
         # l=40,
