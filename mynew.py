@@ -219,9 +219,13 @@ fig.update_traces(
 
 # Display the plot
 # st.title("Duolingo League Visualization")
-st.title("排名")
-import datetime
-st.write(datetime.datetime.now())
+# st.title("排名")
+import datetime,pytz
+st.write("### {}".format(datetime.datetime.now(
+
+
+    pytz.timezone('Asia/Taipei')
+)))
 
 
 st.plotly_chart(fig)
