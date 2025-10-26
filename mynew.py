@@ -28,30 +28,28 @@ for item in raw_data.split(';'):
 
 df = pd.DataFrame(data)
 
-Visualization_scale = (
-    df["score"].max()
-)
-# st.write("Visualization_scale: ", Visualization_scale)
-# Reverse rank to flip the x-axis order
-df["rank_reversed"] = max(df["rank"]) - df["rank"] + 1
-df["x_position"] = max(df["rank"]) - df["rank"]
+Visualization_scale = df["score"].max()
 
-# Calculate differences between scores and their midpoints
-df["score_diff"] = df["score"].diff(periods=-1).fillna(0).astype(int)  # Difference between consecutive scores
-df["mid_x"] = (df["x_position"] + df["x_position"].shift(-1)) / 2  # Midpoint of x_position
-# df["mid_y"] = ((df["score"] + df["score"].shift(-1)) / 2) * 1.09 # Midpoint of scores
-df["mid_y"] = (df["score"] + df["score"].shift(-1)) / 2 * 1 + Visualization_scale * 0.12 # Midpoint of scores
+# === 橫向佈局的座標 ===
+# 以「排名 1 在最上方」為目標，使用連續的 y 位置
+# 也可直接用 rank 當 y，然後 y 軸 reversed
+df["y_position"] = df["rank"]  # 直接用 rank；等會用 yaxis.autorange="reversed"
+
+# 分數差與註記位置（橫向版）
+df["score_diff"] = df["score"].diff(periods=-1).fillna(0).astype(int)  # 下一名的差
+df["mid_y"] = (df["y_position"] + df["y_position"].shift(-1)) / 2      # 兩名之間的 y 中點
+df["mid_x"] = (df["score"] + df["score"].shift(-1)) / 2 + Visualization_scale * 0.12  # x 往右偏一點
 df["score_diff_text"] = df["score_diff"].apply(lambda x: f"{abs(x)}" if x != 0 else "")
-# df["text_annotation"] = df["name"] + "<br />" + df["score"].astype(str)
 df["text_annotation"] = df["name"]
-df["score_text_position"] = df["score"].apply(
-    lambda x: (x + Visualization_scale * 0.03 
+
+# 橫向版的分數數值標示位置：同一 y，上方改為右側位移
+df["score_text_position_x"] = df["score"].apply(
+    lambda x: (x + Visualization_scale * 0.03
                if x > Visualization_scale * 0.02 else
-               x + Visualization_scale * 0.08)  # Adjust text position based on score
+               x + Visualization_scale * 0.08)
 )
 
-
-# Define custom color mapping
+# 顏色
 color_map = {
     "tournament": "cyan",
     "keep": "blue",
@@ -70,194 +68,132 @@ def color_my_ify(color, is_me):
     else:
         return "rgba(128, 128, 128, 0.5)"
 
-# Assign dummy results for demo purposes (replace with actual logic)
+# tier 決策
 df["result"] = [
-    "tournament" if rank <= tier_top else 
-    "keep" if rank <= tier_bottom else 
-    "demotion" 
-    for rank in df["rank"]]
+    "tournament" if rank <= tier_top else
+    "keep" if rank <= tier_bottom else
+    "demotion"
+    for rank in df["rank"]
+]
 
+def color_determiner(row):
+    return color_my_ify(
+        color_map[row["result"]],
+        is_me=(row["name"] == MY_NAME)
+    )
 
-# Create the figure
-fig = go.Figure()
-
-
-
-def color_determiner(
-        row,
-):
-    result = color_my_ify(
-                color_map[row["result"]],
-                is_me=(row["name"] == MY_NAME)  # Replace with actual logic to check if it's the user's name
-            )
-    return result
-
-def color_determiner2(
-        row,
-):
-    if color_determiner(row) == "rgba(0, 255, 0, 0.5)":
+def color_determiner2(row):
+    c = color_determiner(row)
+    if c == "rgba(0, 255, 0, 0.5)":
         return "green"
-    elif color_determiner(row) == "rgba(100, 100, 255, 0.5)":
+    elif c == "rgba(100, 100, 255, 0.5)":
         return "blue"
-    elif color_determiner(row) == "rgba(255, 100, 0, 0.5)":
+    elif c == "rgba(255, 100, 0, 0.5)":
         return "white"
-    elif color_determiner(row) == "rgba(128, 128, 128, 0.5)":
+    elif c == "rgba(128, 128, 128, 0.5)":
         return "gray"
-    elif color_determiner(row) == "cyan":
+    elif c == "cyan":
         return "black"
-    elif color_determiner(row) == "blue":
+    elif c == "blue":
         return "yellow"
-    elif color_determiner(row) == "red":
+    elif c == "red":
         return "black"
     else:
         return "yellow"
 
+# Figure
+fig = go.Figure()
 
-# Add bars for each rank
+# 橫向長條
 for i, row in df.iterrows():
     fig.add_trace(go.Bar(
-        x=[row["x_position"]],
-        y=[row["score"]],
-        marker_color=(
-            color_determiner(row)
-        ),
-        # name=row["result"] if i == 0 else None,  # Show legend only once
-        
-        # text=row["text_annotation"],
-        # === add url
+        y=[row["y_position"]],
+        x=[row["score"]],
+        orientation="h",
+        marker_color=color_determiner(row),
         text=(
             f'<a href='
-                "https://www.example.com/"
+            "https://www.example.com/"
             f' target="_blank">'
             f'<span style="color: {color_determiner2(row)};">'
             f'{row["text_annotation"]}'
             '</span>'
-            '</a>',
+            '</a>'
         ),
         textfont=dict(
-            size=14, 
-            # color="black",
-            color=("magenta" if row["name"] == MY_NAME 
-            else "black" if row["result"] != "keep"
-            else "yellow"),
+            size=14,
+            color=("magenta" if row["name"] == MY_NAME
+                   else "black" if row["result"] != "keep"
+                   else "yellow"),
         ),
         showlegend=False,
-        width=0.9,  # Adjust bar width
-        offsetgroup=0,  # Group bars together
-        base=0,  # Set the base of the bar to 0
+        width=0.9,
+        offsetgroup=0,
+        base=0,
         hovertemplate=None,
     ))
 
-# Add line plot connecting the top of each bar
+# 連線（分數端點的折線，橫向）
 fig.add_trace(go.Scatter(
-    x=df["x_position"],
-    y=df["score"],
+    x=df["score"],
+    y=df["y_position"],
     mode="lines",
     line=dict(color="black", width=2),
     name="Score Line",
     showlegend=False,
 ))
 
-# Add text annotations for scores
+# 分數數值（顯示在條右側）
 for i, row in df.iterrows():
     fig.add_trace(go.Scatter(
-        x=[row["x_position"]],
-        y=[row["score_text_position"]],
+        x=[row["score_text_position_x"]],
+        y=[row["y_position"]],
         mode="text",
         text=[row["score"]],
         textfont=dict(size=12, color="black"),
         showlegend=False
     ))
 
-
-# Add text annotations for score differences
+# 相鄰差值（放在兩名之間，x 往右偏）
 for i in range(len(df) - 1):
     fig.add_trace(go.Scatter(
         x=[df["mid_x"].iloc[i]],
         y=[df["mid_y"].iloc[i]],
         mode="text",
         text=[df["score_diff_text"].iloc[i]],
-        textfont=dict(size=16, color="magenta",
-                      # bold
-                        # family="Arial",
-                        weight="bold",
-                      ),
+        textfont=dict(size=16, color="magenta", weight="bold"),
         showlegend=False
     ))
 
-# Update layout
+# Layout（橫向）
 fig.update_layout(
-    xaxis=dict(
+    xaxis=dict(title="Score"),
+    yaxis=dict(
         tickmode="array",
-        tickvals=df["x_position"],
+        tickvals=df["y_position"],
         ticktext=df["rank"],
-        title="Rank"
+        title="Rank",
+        autorange="reversed"  # 讓 rank=1 在上方
     ),
-    # horizonal
-
-    yaxis=dict(title="Score"),
     barmode="group",
-    # height=400,
-    # width=1000,
-    margin=dict(
-        # l=40,
-        r=40,
-        t=30,
-        b=10,
-        pad=0,
-        )
-       
+    margin=dict(r=40, t=30, b=10, pad=0),
 )
 
+# ===== START ===== #
+# 🔹自動依 Score 軸刻度加上垂直線
+xaxis_vals = fig.layout.xaxis.tickvals
+if xaxis_vals:
+    for x in xaxis_vals:
+        fig.add_vline(x=x, line=dict(color="lightgray", width=1, dash="dot"), opacity=0.6)
+else:
+    fig.update_xaxes(showgrid=True, gridcolor="lightgray", gridwidth=1)
+# -----  END  ----- #
 
+# 關閉 hover
+fig.update_traces(hoverinfo="none")
 
-# 居然要這樣才能讓 hovertemplate 不顯示！
-fig.update_traces(
-    hoverinfo="none",
-)
-
+# 標題時間
 formatted_time = datetime.datetime.now(pytz.timezone('Asia/Taipei')).strftime('%Y/%m/%d %H:%M:%S')
-
-# 創建 Plotly 
-fig.update_layout(
-    title="{}".format(formatted_time)
-)
-
-
-# Display the plot
-# st.title("Duolingo League Visualization")
-# st.title("排名")
-
-
-# add a button to download the plot as png
-# st.download_button(
-#     label="Download Plot",
-#     data=fig.to_image(format="png"),
-#     file_name="plot.png",
-#     mime="image/png",
-# )
-
-import io
-
-# 將圖表轉換為 PNG 格式的二進制資料
-# img_bytes = fig.to_image(format="png", engine="kaleido")
-# 
-# # 使用 io.BytesIO 將資料轉換成 stream
-# buffer = io.BytesIO(img_bytes)
-
-# # 添加下載按鈕
-# st.download_button(
-#     label="Download Plot",
-#     data=buffer,
-#     file_name="plot.png",
-#     mime="image/png",
-# )
-
-
+fig.update_layout(title=f"{formatted_time}")
 
 st.plotly_chart(fig)
-
-### # Show raw data as a table
-### st.subheader("Raw Data")
-### st.dataframe(df)
-### 
