@@ -8,7 +8,8 @@ import plotly.graph_objects as go
 query_params = st.query_params
 tier_top = int(query_params.get("split1", "3"))
 tier_bottom = int(query_params.get("split2", "10"))
-MY_NAME = query_params.get("name", "Kaede かえで كايدي")
+# MY_NAME = query_params.get("name", "Kaede かえで كايدي")
+MY_NAME = query_params.get("name", "中野 Kaede （楓）")
 
 raw_data = query_params.get("data", [None])
 
